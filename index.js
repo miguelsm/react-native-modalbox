@@ -7,13 +7,10 @@ var {
   PanResponder,
   Animated,
   TouchableWithoutFeedback,
-  Dimensions,
   Easing,
   BackAndroid,
   Platform,
 } = require('react-native');
-
-var screen = Dimensions.get('window');
 
 var styles = StyleSheet.create({
 
@@ -57,6 +54,7 @@ var ModalBox = React.createClass({
     onClosed: React.PropTypes.func,
     onOpened: React.PropTypes.func,
     onClosingState: React.PropTypes.func,
+    viewport: React.PropTypes.object.isRequired
   },
 
   getDefaultProps: function () {
@@ -76,21 +74,17 @@ var ModalBox = React.createClass({
   },
 
   getInitialState: function () {
-    var size = this.viewport ? {
-        width: this.viewport.width,
-        height: this.viewport.height
-      } : screen;
-    var position = this.props.entry === 'top' ? -size.height : size.height;
+    var position = this.props.entry === 'top' ? -this.props.viewport.height : this.props.viewport.height;
     return {
       position: this.props.startOpen ? new Animated.Value(0) : new Animated.Value(position),
       backdropOpacity: new Animated.Value(0),
       isOpen: this.props.startOpen,
       isAnimateClose: false,
       isAnimateOpen: false,
-      height: size.height,
-      width: size.width,
-      containerHeight: size.height,
-      containerWidth: size.width,
+      height: this.props.viewport.height,
+      width: this.props.viewport.width,
+      containerHeight: this.props.viewport.height,
+      containerWidth: this.props.viewport.width,
       isInitialized: false
     };
   },
@@ -107,20 +101,6 @@ var ModalBox = React.createClass({
   },
 
   componentWillReceiveProps: function(props) {
-    if (props.viewport) {
-      if (!this.viewport) {
-        this.viewport = props.viewport;
-      } else if (this.viewport.width !== props.viewport.width ||
-                 this.viewport.height !== props.viewport.height) {
-        this.viewport = props.viewport;
-        var existingPanHandlers = this.state.pan;
-        var newState = this.getInitialState();
-        if (existingPanHandlers) {
-          newState.pan = existingPanHandlers;
-        }
-        this.setState(newState);
-      }
-    }
     this.handleOpenning(props);
   },
 
